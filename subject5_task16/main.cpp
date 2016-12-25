@@ -1,64 +1,65 @@
 #include <iostream>
 #include <fstream>
-#include <math.h>
-#include <set>
-#include <iomanip>
 #include <vector>
-#include <queue>
 
 using namespace std;
 ifstream fin("input.txt");
-ofstream fout("output.txt");
+FILE *out = fopen("output.txt", "w");
 
-int c = 1;
+struct domino {
+    int first, second, index, r_index;
 
-class Compare {
-public:
-    bool operator()(pair<int, int> a, pair<int, int> b) {
-        if ((c + a.second) / a.first != (c + b.second) / b.first)
-            return (c + a.second) / (double) a.first > (c + b.second) / (double) b.first;
-        else
-            return a.first > b.first;
-    }
+    domino(int first, int second) : first(first), second(second), index(first * 10 + second),
+                                    r_index(first + 10 * second) { }
 };
 
+int k, ans = 0, n = 7;
+vector<bool> visit = vector<bool>(n * 10, false);
+vector<domino> way;
+
+
+void dfs(domino cur) {
+    visit[cur.index] = true;
+    visit[cur.r_index] = true;
+    way.push_back(cur);
+
+    if (way.size() == k) {
+        if (way[0].first == way[k - 1].second
+            && (k == 1 || (way[0].first != way[0].second || way[1].second < way[k - 1].first))) {
+            for (int i = 0; i < k; i++)
+                fprintf(out, "%d.%d ", way[i].first, way[i].second);
+            fprintf(out, "\n");
+            ans++;
+        }
+        return;
+    }
+
+    for (int j = 0; j < n; j++) {
+        domino next = domino(cur.second, j);
+        if (!visit[next.index]) {
+            dfs(next);
+            way.pop_back();
+            visit[next.index] = false;
+            visit[next.r_index] = false;
+        }
+    }
+
+}
+
 int main() {
-    int n, m, x;
-    double ans = 0.0;
-    fin >> n;
-    multiset<int, greater<int> > job;
+    fin >> k;
 
-    for (int i = 0; i < n; i++) {
-        fin >> x;
-        job.insert(x);
+    if (k < 1 || k == 2 || k > 28) {
+        fprintf(out, "wrong count");
+        return 0;
     }
 
-    fin >> m;
-    priority_queue<pair<int, int>, vector<pair<int, int> >, Compare> workers;
-
-    for (int i = 0; i < m; i++) {
-        fin >> x;
-        workers.push(make_pair(x, 0));
-    }
-
-    for (set<int>::iterator it = job.begin(); it != job.end(); it++) {
-        c = *it;
-        priority_queue<pair<int, int>, vector<pair<int, int> >, Compare> sorted_workers;
-
-        for (int i=0;i<m;i++) {
-            sorted_workers.push(workers.top());
-            workers.pop();
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++) {
+            way.clear();
+            dfs(domino(i, j));
         }
 
-        pair<int, int> w = sorted_workers.top();
-        sorted_workers.pop();
-        w.second += *it;
-        ans = max(ans, ((double) w.second / w.first));
-
-        sorted_workers.push(w);
-        workers = sorted_workers;
-    }
-
-    fout << fixed << setprecision(5) << ans;
+    fprintf(out, "%d", ans);
     return 0;
 }
