@@ -7,3 +7,5 @@ practise tasks on theory of algorithms in FAMCS, BSU:
 * [subject #4](https://github.com/Drapegnik/algorithms/tree/master/subject4_task10) - **Algorithms on graphs**
 * [subject #5](https://github.com/Drapegnik/algorithms/tree/master/subject5_task16) - **Brute force**
 * [subject #6](https://github.com/Drapegnik/algorithms/tree/master/subject6_task17) - **Approximate algorithms**
+
+*by [@drapegnik](https://github.com/Drapegnik), february'16 - may'16*
