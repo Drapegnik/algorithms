@@ -1,5 +1,5 @@
 # Algorithms
-practise tasks on theory of algorithms in FAMCS, BSU:
+My solutions problems from [Theory of algorithms course](https://acm.bsu.by/) on [FAMCS](http://www.fpmi.bsu.by/en/main.aspx), [BSU](http://www.bsu.by/en/main.aspx)
 
 * [subject #1](https://github.com/Drapegnik/algorithms/tree/master/subject1_task14) - **Binary Search Trees**
 * [subject #2](https://github.com/Drapegnik/algorithms/tree/master/subject2_task19.1) - **Recurrence Relations**
