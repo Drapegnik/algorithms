@@ -221,11 +221,7 @@ void BST::force_remove(node* leaf) {
   }
 
   leaf->value = temp->value;
-
-  if (temp->left != NULL)
-    temp->father->right = temp->left;
-  else
-    temp->father->right = NULL;
+  temp->father->right = temp->left;
 
   delete temp;
 }

@@ -1,4 +1,6 @@
 # Algorithms
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f005bd245c67422a8815746bfaac0021)](https://www.codacy.com/app/Drapegnik/algorithms?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Drapegnik/algorithms&amp;utm_campaign=Badge_Grade)
+
 My solutions problems from [Theory of algorithms course](https://acm.bsu.by/) on [FAMCS](http://www.fpmi.bsu.by/en/main.aspx), [BSU](http://www.bsu.by/en/main.aspx)
 
 * [subject #1](https://github.com/Drapegnik/algorithms/tree/master/subject1_task14) - **Binary Search Trees**
