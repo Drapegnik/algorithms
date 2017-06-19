@@ -1,227 +1,257 @@
 #include <fstream>
-#include <limits.h>
 
 using namespace std;
 ifstream fin("tst.in");
 ofstream fout("tst.out");
 
 class node {
-public:
-    int value;
-    int level;
-    bool isDelete;
-    bool isInWay;
-    node *left;
-    node *right;
-    node *father;
+ public:
+  int value;
+  int level;
+  bool isRemoved;
+  bool isInWay;
+  node* left;
+  node* right;
+  node* father;
 
-    node(int value, node *father, int level) : value(value), father(father), left(NULL), right(NULL),
-                                               level(level), isDelete(false), isInWay(false) { }
+  node(int value, node* father, int level) : value(value), father(father),
+                                             left(NULL), right(NULL),
+                                             level(level), isRemoved(false),
+                                             isInWay(false) {}
 };
 
 class BST {
-public:
-    int minway;
+ public:
+  int min_way;
 
-    BST() : root(NULL), minway(INT_MAX) { }
+  BST() : root(NULL), min_way(INT_MAX) {}
 
-    void add(int value);
+  void add(int value);
 
-    void order();
+  void order();
 
-    void searchMin();
+  void searchMin();
 
-    void markInWay();
+  void markInWay();
 
-    void markDelete();
+  void markRemoved();
 
-    void Delete();
+  void remove();
 
 
-private:
-    node *root;
+ private:
+  node* root;
 
-    void add(int value, node *leaf);
+  void add(int value, node* leaf);
 
-    void order(node *leaf, bool isLRR);
+  void order(node* leaf, bool isLRR);
 
-    void markInWay(node *leaf);
+  void markInWay(node* leaf);
 
-    void markDelete(node *leaf, int l = 0, int r = 0);
+  void markRemoved(node* leaf, int l = 0, int r = 0);
 
-    void Delete(node *leaf);
+  void remove(node* leaf);
 
-    void del(node *leaf);
+  void force_remove(node* leaf);
 
-    void assign(node *leaf, node *newleaf);
+  void assign(node* leaf, node* new_leaf);
 
 };
 
-void BST::add(int value, node *leaf) {
-    if (value < leaf->value) {
-        if (leaf->left != NULL)
-            add(value, leaf->left);
-        else
-            leaf->left = new node(value, leaf, leaf->level + 1);
-    } else if (value > leaf->value) {
-        if (leaf->right != NULL)
-            add(value, leaf->right);
-        else
-            leaf->right = new node(value, leaf, leaf->level + 1);
+void BST::add(int value, node* leaf) {
+  if (leaf->value == value) { return; }
+
+  if (value < leaf->value) {
+    if (leaf->left == NULL) {
+      leaf->left = new node(value, leaf, leaf->level + 1);
+      return;
     }
+
+    add(value, leaf->left);
+  } else {
+    if (leaf->right == NULL) {
+      leaf->right = new node(value, leaf, leaf->level + 1);
+      return;
+    }
+
+    add(value, leaf->right);
+  }
 }
 
 void BST::add(int value) {
-    if (root != NULL)
-        add(value, root);
-    else
-        root = new node(value, root, 0);
+  if (root == NULL) {
+    root = new node(value, root, 0);
+    return;
+  }
+
+  add(value, root);
 }
 
-void BST::order(node *leaf, bool isRLR) {
+void BST::order(node* leaf, bool isRLR) {
+  if (isRLR) {
+    fout << leaf->value << endl;
+  }
 
-    if (isRLR)
-        fout << leaf->value << endl;
-    else if (leaf->left == NULL && leaf->right == NULL && leaf->level < minway)
-        minway = leaf->level;
+  if (!isRLR &&
+      leaf->left == NULL &&
+      leaf->right == NULL &&
+      leaf->level < min_way) {
+    min_way = leaf->level;
+  }
 
 
-    if (leaf->left != NULL)
-        order(leaf->left, isRLR);
+  if (leaf->left != NULL) {
+    order(leaf->left, isRLR);
+  }
 
-
-    if (leaf->right != NULL)
-        order(leaf->right, isRLR);
+  if (leaf->right != NULL) {
+    order(leaf->right, isRLR);
+  }
 }
 
 void BST::order() {
-    if (root != NULL)
-        order(root, true);
+  if (root == NULL) { return; }
+  order(root, true);
 }
 
 void BST::searchMin() {
-    if (root != NULL)
-        order(root, false);
+  if (root == NULL) { return; }
+  order(root, false);
 }
 
-void BST::markInWay(node *leaf) {
-    if (leaf->left == NULL && leaf->right == NULL) {
-        if (leaf->level == minway)
-            leaf->isInWay = true;
-    } else {
-        if (leaf->left != NULL) {
-            markInWay(leaf->left);
-            if (leaf->left->isInWay)
-                leaf->isInWay = true;
-        }
-        if (leaf->right != NULL) {
-            markInWay(leaf->right);
-            if (leaf->right->isInWay)
-                leaf->isInWay = true;
-        }
+void BST::markInWay(node* leaf) {
+  if (leaf->left == NULL && leaf->right == NULL) {
+    if (leaf->level == min_way) {
+      leaf->isInWay = true;
     }
+
+    return;
+  }
+
+  if (leaf->left != NULL) {
+    markInWay(leaf->left);
+    if (leaf->left->isInWay) { leaf->isInWay = true; }
+  }
+
+  if (leaf->right != NULL) {
+    markInWay(leaf->right);
+    if (leaf->right->isInWay) { leaf->isInWay = true; }
+  }
+
 
 }
 
 void BST::markInWay() {
-    if (minway % 2 == 0 && root != NULL)
-        markInWay(root);
+  if (min_way % 2 != 0 || root == NULL) { return; }
 
+  markInWay(root);
 };
 
-void BST::markDelete(node *leaf, int l, int r) {
-    if (leaf->isInWay) {
-        if (l == minway / 2 && r == minway / 2)
-            leaf->isDelete = true;
-        else if (l == minway / 2 && leaf->left && leaf->left->isInWay)
-            leaf->isDelete = true;
-        else if (r == minway / 2 && leaf->right && leaf->right->isInWay)
-            leaf->isDelete = true;
-    }
+void BST::markRemoved(node* leaf, int l, int r) {
+  if (leaf->isInWay) {
+    if (l == min_way / 2 && r == min_way / 2)
+      leaf->isRemoved = true;
+    else if (l == min_way / 2 && leaf->left && leaf->left->isInWay)
+      leaf->isRemoved = true;
+    else if (r == min_way / 2 && leaf->right && leaf->right->isInWay)
+      leaf->isRemoved = true;
+  }
 
-    if (leaf->left != NULL)
-        markDelete(leaf->left, l + 1, r);
-    if (leaf->right != NULL)
-        markDelete(leaf->right, l, r + 1);
+  if (leaf->left != NULL)
+    markRemoved(leaf->left, l + 1, r);
+  if (leaf->right != NULL)
+    markRemoved(leaf->right, l, r + 1);
 }
 
-void BST::markDelete() {
-    if (minway % 2 == 0 && root != NULL) {
-        markDelete(root);
-    }
+void BST::markRemoved() {
+  if (min_way % 2 != 0 || root == NULL) { return; }
+  markRemoved(root);
 }
 
-void BST::Delete(node *leaf) {
-    if (leaf->left != NULL)
-        Delete(leaf->left);
+void BST::remove(node* leaf) {
+  if (leaf->left != NULL) {
+    remove(leaf->left);
+  }
 
-    if (leaf->isDelete)
-        del(leaf);
+  if (leaf->isRemoved) {
+    force_remove(leaf);
+  }
 
-    if (leaf->right != NULL)
-        Delete(leaf->right);
+  if (leaf->right != NULL)
+    remove(leaf->right);
 }
 
-void BST::Delete() {
-    if (minway % 2 == 0 && root != NULL)
-        Delete(root);
+void BST::remove() {
+  if (min_way % 2 != 0 || root == NULL) { return; }
+  remove(root);
 }
 
-void BST::del(node *leaf) {
-    if (leaf->left == NULL && leaf->right == NULL)
-        assign(leaf, NULL);
-    else if (leaf->right == NULL)
-        assign(leaf, leaf->left);
-    else if (leaf->left == NULL)
-        assign(leaf, leaf->right);
-    else {
-        node *temp = leaf->left;
+void BST::force_remove(node* leaf) {
+  if (leaf->left == NULL && leaf->right == NULL) {
+    assign(leaf, NULL);
+    return;
+  }
 
-        if (temp->right == NULL) {
-            leaf->value = temp->value;
-            leaf->left = temp->left;
-        }
-        else {
-            while (temp->right != NULL)
-                temp = temp->right;
+  if (leaf->right == NULL) {
+    assign(leaf, leaf->left);
+    return;
+  }
 
-            leaf->value = temp->value;
+  if (leaf->left == NULL) {
+    assign(leaf, leaf->right);
+    return;
+  }
 
-            if (temp->left != NULL)
-                temp->father->right = temp->left;
-            else
-                temp->father->right = NULL;
-        }
-        delete temp;
-    }
+  node* temp = leaf->left;
+
+  if (temp->right == NULL) {
+    leaf->value = temp->value;
+    leaf->left = temp->left;
+    delete temp;
+    return;
+  }
+
+  while (temp->right != NULL) {
+    temp = temp->right;
+  }
+
+  leaf->value = temp->value;
+
+  if (temp->left != NULL)
+    temp->father->right = temp->left;
+  else
+    temp->father->right = NULL;
+
+  delete temp;
 }
 
-void BST::assign(node *leaf, node *newleaf) {
-    if (leaf->father == NULL)
-        root = newleaf;
-    else if (leaf->father->left == leaf)
-        leaf->father->left = newleaf;
-    else if (leaf->father->right == leaf)
-        leaf->father->right = newleaf;
-    delete leaf;
+void BST::assign(node* leaf, node* new_leaf) {
+  if (leaf->father == NULL) {
+    root = new_leaf;
+  } else if (leaf->father->left == leaf) {
+    leaf->father->left = new_leaf;
+  } else if (leaf->father->right == leaf) {
+    leaf->father->right = new_leaf;
+  }
+  delete leaf;
 };
 
 
 int main() {
-    BST tree;
-    while (!fin.eof()) {
-        int v;
-        fin >> v;
-        tree.add(v);
-    }
+  BST tree;
+  while (!fin.eof()) {
+    int v;
+    fin >> v;
+    tree.add(v);
+  }
 
-    tree.searchMin();
-    tree.markInWay();
-    tree.markDelete();
-    tree.Delete();
-    tree.order();
+  tree.searchMin();
+  tree.markInWay();
+  tree.markRemoved();
+  tree.remove();
+  tree.order();
 
-    fin.close();
-    fout.close();
-    return 0;
+  fin.close();
+  fout.close();
+  return 0;
 }
