@@ -149,18 +149,22 @@ void BST::markInWay() {
 
 void BST::markRemoved(node* leaf, int l, int r) {
   if (leaf->isInWay) {
-    if (l == min_way / 2 && r == min_way / 2)
+    if (l == min_way / 2 && r == min_way / 2) {
       leaf->isRemoved = true;
-    else if (l == min_way / 2 && leaf->left && leaf->left->isInWay)
+    } else if (l == min_way / 2 && leaf->left && leaf->left->isInWay) {
       leaf->isRemoved = true;
-    else if (r == min_way / 2 && leaf->right && leaf->right->isInWay)
+    } else if (r == min_way / 2 && leaf->right && leaf->right->isInWay) {
       leaf->isRemoved = true;
+    }
   }
 
-  if (leaf->left != NULL)
+  if (leaf->left != NULL) {
     markRemoved(leaf->left, l + 1, r);
-  if (leaf->right != NULL)
+  }
+
+  if (leaf->right != NULL) {
     markRemoved(leaf->right, l, r + 1);
+  }
 }
 
 void BST::markRemoved() {
@@ -177,8 +181,9 @@ void BST::remove(node* leaf) {
     force_remove(leaf);
   }
 
-  if (leaf->right != NULL)
+  if (leaf->right != NULL) {
     remove(leaf->right);
+  }
 }
 
 void BST::remove() {
